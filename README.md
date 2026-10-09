@@ -16,7 +16,7 @@ npx serve .            # or: python3 -m http.server 8000
 
 Then open the printed URL.
 
-> **Logo and double-click:** browsers block pages opened via `file://` from reading local image files into a canvas. The app header still shows `parloa-logo.svg`, but the PDF falls back to the text wordmark "Parloa". If you need the logo in the PDF while using double-click, set `CONFIG.logo.dataUrl` (see [Swapping the logo](#swapping-the-logo)). When the app is hosted, the logo works without extra setup.
+The Parloa logo is embedded in `index.html`, so the file works on its own. You can share just that one file.
 
 ### What's inside
 
@@ -94,22 +94,25 @@ All settings are in the `CONFIG` object at the top of the script in `index.html`
 ```js
 company: {
   name: 'Parloa GmbH',
-  address: ['Street and number', '10115 Berlin', 'Germany'], // one entry per line
+  address: ['Schönhauser Allee 9', '10119 Berlin', 'Germany'], // one entry per line
 },
 ```
-
-The address currently contains placeholders in square brackets. Replace them before you use the tool for real.
 
 Other settings: `numberPrefix` (default `SR`), `defaultCurrency` (default `EUR`), `currencies` (the options in the dropdown) and `highAmountThreshold` (default `150`).
 
 ### Swapping the logo
 
-1. Put the **dark** logo (for the white PDF) next to `index.html` and name it `parloa-logo.svg`, or point `CONFIG.logo.src` to another file. Make sure the SVG root element has `width` and `height` attributes, or at least a `viewBox`.
-2. In the dark app header, the same file is shown recoloured to white. If you have a dedicated white version, set `CONFIG.logo.srcOnDark: './parloa-logo-white.svg'`.
-3. Optional, so the logo also appears in the PDF when the file is opened by double-click: convert the dark logo to a data URL and paste it into `CONFIG.logo.dataUrl`.
+The dark logo is embedded as a PNG data URL (`PARLOA_LOGO_PNG`, defined just above `CONFIG`) and assigned to `CONFIG.logo.dataUrl`. The PDF uses it as is, and the dark app header shows it recoloured to white. Because it is embedded, it also renders in the PDF when the file is opened by double-click. Browsers block pages opened via `file://` from reading separate image files into the PDF renderer, which is why a separate file isn't used.
+
+To use a different logo:
+
+1. Create a dark logo on a transparent background (PNG or SVG). `parloa-logo.png` and `parloa-logo-white.png` in this repo are the current versions.
+2. Convert it to a data URL and replace the value of `PARLOA_LOGO_PNG`:
    ```bash
-   echo "data:image/svg+xml;base64,$(base64 -w0 parloa-logo.svg)"   # macOS: base64 -i parloa-logo.svg
+   echo "data:image/png;base64,$(base64 -w0 parloa-logo.png)"   # macOS: base64 -i parloa-logo.png
    ```
+   Alternatively, set `PARLOA_LOGO_PNG` to `''` and point `CONFIG.logo.src` to a file next to `index.html`. That only shows up in the PDF when the app is hosted, not when it is opened by double-click.
+3. Optional: set `CONFIG.logo.srcOnDark` to a dedicated white logo for the app header.
 
 If no logo can be loaded, the app and the PDF show the text wordmark "Parloa".
 
